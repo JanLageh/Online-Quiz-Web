@@ -19,8 +19,58 @@
         <h2 class="text-xl font-semibold mb-2">User Management</h2>
         <p class="mb-2">Create, edit, deactivate accounts for teachers & students. Reset passwords as needed.</p>
         <div class="flex gap-2 mb-4">
-          <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add User</button>
-          <button class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Reset Password</button>
+          <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" @click="showAddUserModal = true">Add User</button>
+          <button class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" @click = "showResetPasswordModal = true">Reset Password</button>
+        </div>
+        <!--Add User Modal-->
+        <div v-if="showAddUserModal" class="fixed inset-0 bg-opacity-0 flex items-center justify-center">
+          <div class="bg-white p-6 rounded shadow-lg w-96">
+            <h3 class="text-lg font-semibold mb-4">Add New User</h3>
+            <form @submit.prevent="addUser" class="space-y-4">
+              <div>
+                <label class="block font-medium">Name:</label>
+                <input type="text" v-model="newUser.name" required class="border rounded px-2 py-1 w-full" />
+              </div>
+              <div>
+                <label class="block font-medium">Email:</label>
+                <input type="email" v-model="newUser.email" required class="border rounded px-2 py-1 w-full" />
+              </div>
+              <div>
+                <label class="block font-medium">Role:</label>
+                <select v-model="newUser.role" required class="border rounded px-2 py-1 w-full">
+                  <option value="Student">Student</option>
+                  <option value="Teacher">Teacher</option>
+                  <option value="Admin">Admin</option>
+                </select>
+              </div>
+              <div class="flex justify-end gap-2">
+                <button type="button" @click="showAddUserModal = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add User</button>
+              </div>
+            </form>
+          </div>
+          <!-- Reset Password Modal -->
+           <div v-if="showResetPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div class="bg-white p-6 rounded shadow-lg w-96">
+            <h3 class="text-lg font-semibold mb-4">Reset User Password</h3>
+            <form @submit.prevent="resetPassword" class="space-y-4">
+              <div class="mb-4">
+                <label class="block font-medium">Select User:</label>
+                <select v-model="selectedUserId" required class="border rounded px-2 py-1 w-full">
+                  <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }} ({{ user.email }})</option>
+                </select>
+              </div>
+              <div class="mb-2">
+                <label class="block font-medium">New Password:</label>
+                <input type="password" v-model="newPassword" required class="border rounded px-2 py-1 w-full" />
+              </div>
+              <div class="flex justify-end gap-2 mt-4">
+                <button type="button" class="px-3 py-1 bg-gray-300 rounded" @click="showResetPasswordModal = false">Cancel</button>
+                <button type="submit" class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">Reset Password</button>
+              </div>
+            </form>
+          </div>
+         </div>
         </div>
         <table class="min-w-full bg-white">
           <thead>
@@ -175,4 +225,47 @@ const logs = ref<Log[]>([
   { id: 2, type: 'Quiz Created', message: 'Math Quiz 1 created by John Doe', time: '2025-09-13 14:22' },
   { id: 3, type: 'Warning', message: 'Tab switch detected for Robert Johnson', time: '2025-09-13 15:10' },
 ])
+
+//Modal State
+const showAddUserModal = ref(false)
+const showResetPasswordModal = ref(false)
+
+//Add User Modal data
+const newUser = reactive({
+  name: '',
+  email: '',
+  role: 'Student',
+})
+
+//Add User Handler
+function addUser() {
+  if(newUser.name && newUser.email){
+    users.value.push({
+      id: Date.now(),
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      active: true,
+    })
+    newUser.name = ''
+    newUser.email = ''
+    newUser.role = 'Student'
+    showAddUserModal.value = false
+  }
+}
+
+//Reset Password Modal Data
+const selectedUserId = ref<number | null>(null)
+const newPassword = ref('')
+
+//Reset Password Handler
+function resetPassword() {
+  if (selectedUserId.value && newPassword.value) {
+    // Simulate password reset (replace with actual API call)
+    alert(`Password for user ID ${selectedUserId.value} reset to "${newPassword.value}"`)
+    selectedUserId.value = null
+    newPassword.value = ''
+    showResetPasswordModal.value = false
+  }
+}
 </script>
